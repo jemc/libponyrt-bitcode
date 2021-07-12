@@ -1,0 +1,83 @@
+task:
+  container:
+    cpu: 8
+    memory: 24
+
+  environment:
+    GITHUB_API_TOKEN: ENCRYPTED[636741c0f231293de78980eb83f86c5b8cd5dad07a79351e239c097e42ee4cc0f28113a26f6ad579437e40fcb227066c]
+    PONYC_GIT_URL: https://github.com/ponylang/ponyc
+    PONYC_VERSION: main # TODO: switch to specific release tag at next release
+    CC: clang
+    CXX: clang++
+
+  matrix:
+    - name: x86_64-unknown-linux-gnu
+      container:
+        image: ubuntu:21.04
+      environment:
+        TRIPLE: x86_64-unknown-linux-gnu
+        DEPS_INSTALL_PRE: apt-get update
+        DEPS_INSTALL: apt-get install -y --no-install-recommends apt-transport-https ca-certificates clang cmake curl git llvm make
+
+    - name: x86_64-unknown-linux-musl
+      environment:
+        TRIPLE: x86_64-unknown-linux-musl
+        DEPS_INSTALL: apk add --no-cache --update alpine-sdk coreutils linux-headers clang-dev cmake llvm11-dev
+        PATCH_1: sed -i s/SO_RCVTIMEO/SO_RCVTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
+        PATCH_2: sed -i s/SO_SNDTIMEO/SO_SNDTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
+      container:
+        image: alpine:3.14
+
+    - name: x86_64-unknown-freebsd
+      environment:
+        TRIPLE: x86_64-unknown-freebsd
+        DEPS_INSTALL_PRE: pkg update
+        DEPS_INSTALL: pkg install -y cmake gmake libunwind git llvm
+      freebsd_instance:
+        image: freebsd-13-0-release-amd64
+
+    - name: x86_64-apple-macosx
+      environment:
+        TRIPLE: x86_64-apple-macosx
+        DEPS_INSTALL_PRE: brew install llvm
+        DEPS_INSTALL: ln -s /usr/local/opt/llvm/bin/llvm-link /usr/local/bin/llvm-link
+        SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+      macos_instance:
+        image: big-sur-xcode-12.5
+
+    - name: arm64-apple-macosx
+      environment:
+        TRIPLE: arm64-apple-macosx
+        DEPS_INSTALL_PRE: brew install llvm
+        DEPS_INSTALL: ln -s /usr/local/opt/llvm/bin/llvm-link /usr/local/bin/llvm-link
+        PATCH_1: 'sed -i.bak "s/-DBUILD_COMPILER/$<IF:$<BOOL:$\{CMAKE_C_COMPILER_TARGET}>,--target=$\{CMAKE_C_COMPILER_TARGET},> -DBUILD_COMPILER/g" /tmp/ponyc/src/libponyrt/CMakeLists.txt'
+        PATCH_2: 'sed -i.bak "s/mach_absolute_time()/clock_gettime_nsec_np(CLOCK_UPTIME_RAW)/g" /tmp/ponyc/src/libponyrt/sched/cpu.c'
+        SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+        EXTRA_CMAKE_FLAGS: "-DCMAKE_C_COMPILER_TARGET=arm64-apple-macosx -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=arm64"
+      macos_instance:
+        image: big-sur-xcode-12.5
+
+  deps_script:
+    - sh -c "${DEPS_INSTALL_PRE:-echo}" && sh -c "${DEPS_INSTALL:-echo}"
+
+  clone_script:
+    - git clone -b ${PONYC_VERSION} --depth 1 ${PONYC_GIT_URL} /tmp/ponyc
+    - sh -c "${PATCH_1:-echo}" && sh -c "${PATCH_2:-echo}"
+    - cd /tmp/ponyc && git diff
+
+  build_script:
+    - mkdir /tmp/ponyc/src/libponyrt/build
+    - cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${EXTRA_CMAKE_FLAGS}
+    - cmake --build /tmp/ponyc/src/libponyrt/build --target libponyrt_bc
+
+  publish_if_release_script:
+    - >-
+      sh -c '
+        test -z "${CIRRUS_RELEASE}" || \
+          curl -v --fail -X POST \
+            -H "Authorization: token ${GITHUB_API_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @/tmp/ponyc/src/libponyrt/build/libponyrt.bc \
+            "https://uploads.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE/assets?name=${TRIPLE}-libponyrt.bc" \
+      '

@@ -6,7 +6,7 @@ task:
   environment:
     GITHUB_API_TOKEN: ENCRYPTED[636741c0f231293de78980eb83f86c5b8cd5dad07a79351e239c097e42ee4cc0f28113a26f6ad579437e40fcb227066c]
     PONYC_GIT_URL: https://github.com/ponylang/ponyc
-    PONYC_VERSION: main # TODO: switch to specific release tag at next release
+    PONYC_VERSION: 0.43.0
     CC: clang
     CXX: clang++
 
@@ -50,8 +50,6 @@ task:
         TRIPLE: arm64-apple-macosx
         DEPS_INSTALL_PRE: brew install llvm
         DEPS_INSTALL: ln -s /usr/local/opt/llvm/bin/llvm-link /usr/local/bin/llvm-link
-        PATCH_1: 'sed -i.bak "s/-DBUILD_COMPILER/$<IF:$<BOOL:$\{CMAKE_C_COMPILER_TARGET}>,--target=$\{CMAKE_C_COMPILER_TARGET},> -DBUILD_COMPILER/g" /tmp/ponyc/src/libponyrt/CMakeLists.txt'
-        PATCH_2: 'sed -i.bak "s/mach_absolute_time()/clock_gettime_nsec_np(CLOCK_UPTIME_RAW)/g" /tmp/ponyc/src/libponyrt/sched/cpu.c'
         SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
         EXTRA_CMAKE_FLAGS: "-DCMAKE_C_COMPILER_TARGET=arm64-apple-macosx -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=arm64"
       macos_instance:

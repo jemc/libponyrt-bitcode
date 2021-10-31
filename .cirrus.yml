@@ -58,10 +58,11 @@ task:
   deps_script:
     - sh -c "${DEPS_INSTALL_PRE:-echo}" && sh -c "${DEPS_INSTALL:-echo}"
 
-  clone_script:
+  ponyc_clone_script:
     - git clone -b ${PONYC_VERSION} --depth 1 ${PONYC_GIT_URL} /tmp/ponyc
     - sh -c "${PATCH_1:-echo}" && sh -c "${PATCH_2:-echo}"
     - cd /tmp/ponyc && git diff
+    - cd /tmp/ponyc && git apply ${CIRRUS_WORKING_DIR}/patches/*
 
   build_script:
     - mkdir /tmp/ponyc/src/libponyrt/build

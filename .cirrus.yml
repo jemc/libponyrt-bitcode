@@ -70,6 +70,7 @@ task:
     - cmake --build /tmp/ponyc/src/libponyrt/build --target libponyrt_bc
 
   publish_if_release_script:
+    - echo CIRRUS_RELEASE "${CIRRUS_RELEASE:-NO}"
     - >-
       sh -c '
         test -z "${CIRRUS_RELEASE}" || \
@@ -79,4 +80,9 @@ task:
             -H "Content-Type: application/octet-stream" \
             --data-binary @/tmp/ponyc/src/libponyrt/build/libponyrt.bc \
             "https://uploads.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE/assets?name=${TRIPLE}-libponyrt.bc" \
+      '
+    - >-
+      sh -c '
+        test -z "${CIRRUS_RELEASE}" || \
+          wget "https://github.com/$CIRRUS_REPO_FULL_NAME/releases/download/$CIRRUS_RELEASE/${TRIPLE}-libponyrt.bc" \
       '

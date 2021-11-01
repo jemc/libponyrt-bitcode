@@ -77,8 +77,3 @@ task:
             --data-binary @/tmp/ponyc/src/libponyrt/build/libponyrt.bc \
             "https://uploads.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE/assets?name=${TRIPLE}-libponyrt.bc" \
       '
-    - >-
-      sh -c '
-        test -z "${CIRRUS_RELEASE}" || \
-          curl -v "https://github.com/$CIRRUS_REPO_FULL_NAME/releases/download/$CIRRUS_RELEASE/${TRIPLE}-libponyrt.bc" --output /tmp/downloaded-libponyrt.bc \
-      '

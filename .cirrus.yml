@@ -84,5 +84,5 @@ task:
     - >-
       sh -c '
         test -z "${CIRRUS_RELEASE}" || \
-          wget "https://github.com/$CIRRUS_REPO_FULL_NAME/releases/download/$CIRRUS_RELEASE/${TRIPLE}-libponyrt.bc" \
+          curl -v "https://github.com/$CIRRUS_REPO_FULL_NAME/releases/download/$CIRRUS_RELEASE/${TRIPLE}-libponyrt.bc" --output /tmp/downloaded-libponyrt.bc \
       '

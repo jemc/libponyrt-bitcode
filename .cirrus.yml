@@ -65,6 +65,13 @@ task:
     - cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${EXTRA_CMAKE_FLAGS}
     - cmake --build /tmp/ponyc/src/libponyrt/build --target libponyrt_bc
 
+  archive_script:
+    - mkdir /tmp/out
+    - cp /tmp/ponyc/src/libponyrt/build/libponyrt.bc /tmp/out/libsavi_runtime.bc
+    - cp -r /tmp/ponyc/src/libponyrt /tmp/out/libsavi_runtime
+    - rm -rf /tmp/out/libsavi_runtime/build
+    - tar -czvf /tmp/libsavi_runtime.tar.gz -C /tmp/out .
+
   publish_if_release_script:
     - echo CIRRUS_RELEASE "${CIRRUS_RELEASE:-NO}"
     - >-
@@ -74,6 +81,6 @@ task:
             -H "Authorization: token ${GITHUB_API_TOKEN}" \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @/tmp/ponyc/src/libponyrt/build/libponyrt.bc \
-            "https://uploads.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE/assets?name=${TRIPLE}-libponyrt.bc" \
+            --data-binary @/tmp/libsavi_runtime.tar.gz \
+            "https://uploads.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE/assets?name=${TRIPLE}-libsavi_runtime.tar.gz" \
       '

@@ -44,8 +44,8 @@ task:
     - name: x86_64-apple-macosx
       environment:
         TRIPLE: x86_64-apple-macosx
-        DEPS_INSTALL_PRE: brew update && brew install llvm
-        DEPS_INSTALL: ln -s /usr/local/opt/llvm/bin/llvm-link /usr/local/bin/llvm-link
+        DEPS_INSTALL_PRE: brew update && brew install llvm@12
+        DEPS_INSTALL: ln -s $(brew --prefix llvm@12)/bin/llvm-link /usr/local/bin/llvm-link
         SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
       macos_instance:
         image: big-sur-xcode-12.5
@@ -53,8 +53,8 @@ task:
     - name: arm64-apple-macosx
       environment:
         TRIPLE: arm64-apple-macosx
-        DEPS_INSTALL_PRE: brew update && brew install llvm
-        DEPS_INSTALL: ln -s /usr/local/opt/llvm/bin/llvm-link /usr/local/bin/llvm-link
+        DEPS_INSTALL_PRE: brew update && brew install llvm@12
+        DEPS_INSTALL: ln -s $(brew --prefix llvm@12)/bin/llvm-link /usr/local/bin/llvm-link
         SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
         EXTRA_CMAKE_FLAGS: "-DCMAKE_C_COMPILER_TARGET=arm64-apple-macosx -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=arm64"
       macos_instance:

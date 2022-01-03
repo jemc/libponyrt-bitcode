@@ -18,20 +18,20 @@ task:
     - name: x86_64-unknown-linux-musl
       environment:
         TRIPLE: x86_64-unknown-linux-musl
-        DEPS_INSTALL: apk add --no-cache --update alpine-sdk coreutils linux-headers clang-dev cmake llvm11-dev
+        DEPS_INSTALL: apk add --no-cache --update alpine-sdk coreutils linux-headers clang-dev cmake llvm12-dev
         PATCH_1: sed -i s/SO_RCVTIMEO/SO_RCVTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
         PATCH_2: sed -i s/SO_SNDTIMEO/SO_SNDTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
       container:
-        image: alpine:3.14
+        image: alpine:3.15
 
     - name: arm64-unknown-linux-musl
       environment:
         TRIPLE: arm64-unknown-linux-musl
-        DEPS_INSTALL: apk add --no-cache --update alpine-sdk coreutils linux-headers clang-dev cmake llvm11-dev
+        DEPS_INSTALL: apk add --no-cache --update alpine-sdk coreutils linux-headers clang-dev cmake llvm12-dev
         PATCH_1: sed -i s/SO_RCVTIMEO/SO_RCVTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
         PATCH_2: sed -i s/SO_SNDTIMEO/SO_SNDTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
       arm_container:
-        image: alpine:3.14
+        image: alpine:3.15
 
     - name: x86_64-unknown-freebsd
       environment:

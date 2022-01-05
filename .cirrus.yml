@@ -46,21 +46,36 @@ build_task:
     - name: x86_64-apple-macosx
       environment:
         TRIPLE: x86_64-apple-macosx
-        DEPS_INSTALL_PRE: brew update && brew install llvm@12
+        DEPS_INSTALL_PRE: brew update --preinstall && brew install llvm@12 && brew cleanup
         DEPS_INSTALL: ln -s $(brew --prefix llvm@12)/bin/llvm-link /usr/local/bin/llvm-link
         SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1" # optimizes brew install
       macos_instance:
         image: big-sur-xcode-12.5
+      # Caching some homebrew directories helps save some of the otherwise huge
+      # amount of time that it takes to update brew from the CI base image.
+      brew_cache:
+        folder: "$HOME/Library/Caches/Homebrew"
+      brew_usr_local_cache:
+        folder: "/usr/local/Homebrew"
 
     - name: arm64-apple-macosx
       environment:
         TRIPLE: arm64-apple-macosx
-        DEPS_INSTALL_PRE: brew update && brew install llvm@12
+        DEPS_INSTALL_PRE: brew update --preinstall && brew install llvm@12 && brew cleanup
         DEPS_INSTALL: ln -s $(brew --prefix llvm@12)/bin/llvm-link /usr/local/bin/llvm-link
         SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1" # optimizes brew install
+        # We're compiling on an x86_64 host, but want to cross-compile to arm64.
         EXTRA_CMAKE_FLAGS: "-DCMAKE_C_COMPILER_TARGET=arm64-apple-macosx -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=arm64"
       macos_instance:
         image: big-sur-xcode-12.5
+      # Caching some homebrew directories helps save some of the otherwise huge
+      # amount of time that it takes to update brew from the CI base image.
+      brew_cache:
+        folder: "$HOME/Library/Caches/Homebrew"
+      brew_usr_local_cache:
+        folder: "/usr/local/Homebrew"
 
   deps_script:
     - sh -c "${DEPS_INSTALL_PRE:-echo}" && sh -c "${DEPS_INSTALL:-echo}"

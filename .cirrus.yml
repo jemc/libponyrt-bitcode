@@ -132,7 +132,7 @@ bundle_task:
           -H "Authorization: token ${GITHUB_API_TOKEN}" \
           https://api.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE \
         | jq -r ".assets[] | select(.name | endswith(\".bc\")) | .browser_download_url" \
-        | xargs -n 1 curl --fail -O \
+        | xargs -n 1 curl --fail -L -O \
           -H "Authorization: token ${GITHUB_API_TOKEN}" \
       '
     -

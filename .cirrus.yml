@@ -11,11 +11,14 @@ build_task:
 
     - name: x86_64-unknown-linux-gnu
       container:
-        image: ubuntu:21.04
+        image: ubuntu:20.04
       environment:
         TRIPLE: x86_64-unknown-linux-gnu
         DEPS_INSTALL_PRE: apt-get update
         DEPS_INSTALL: apt-get install -y --no-install-recommends apt-transport-https ca-certificates clang cmake curl git llvm make
+        # Without this next environment var, apt-get will try to ask us
+        # interactive questions, to which we will be unable to respond...
+        DEBIAN_FRONTEND: noninteractive
 
     - name: x86_64-unknown-linux-musl
       environment:

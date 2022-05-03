@@ -1,0 +1,160 @@
+name: runtime-bitcode
+on: [push]
+
+env:
+  PONYC_GIT_URL: https://github.com/ponylang/ponyc
+  PONYC_VERSION: main # TODO: use "0.47.1" when it is released
+  CC: clang
+  CXX: clang
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      # - name: Checkout Repository
+      #   uses: actions/checkout@v2
+
+      # - name: Install Dependencies
+      #   run: ${{matrix.deps}}
+
+      # - name: Install Crystal
+      #   uses: crystal-lang/install-crystal@v1
+      #   with:
+      #     crystal: ${{matrix.crystal}}
+
+
+      # - name: Install Build Tools
+      #   shell: sh
+      #   run: choco install --no-progress -y ninja
+
+      - name: Fetch Runtime Source
+        shell: sh
+        run: git clone -b ${PONYC_VERSION} --depth 1 ${PONYC_GIT_URL} /tmp/ponyc
+
+      - name: Build Runtime Bitcode
+        shell: sh
+        run: |
+          find "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC"
+          echo "---"
+          echo "---"
+          echo "---"
+          find "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC" -name 'intrin.h'
+          echo "---"
+          echo "---"
+          echo "---"
+          echo "---"
+          find "C:/Program Files/Microsoft Visual Studio" -name 'intrin.h'
+          echo "---"
+          echo "---"
+          echo "---"
+          echo "---"
+          echo "---"
+          echo "---"
+          echo "---"
+          echo "---"
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/actor/actor.c         -o /tmp/ponyc/src/libponyrt/actor/actor.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/actor/messageq.c      -o /tmp/ponyc/src/libponyrt/actor/messageq.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/asio/asio.c           -o /tmp/ponyc/src/libponyrt/asio/asio.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/asio/epoll.c          -o /tmp/ponyc/src/libponyrt/asio/epoll.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/asio/event.c          -o /tmp/ponyc/src/libponyrt/asio/event.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/asio/iocp.c           -o /tmp/ponyc/src/libponyrt/asio/iocp.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/asio/kqueue.c         -o /tmp/ponyc/src/libponyrt/asio/kqueue.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/ds/fun.c              -o /tmp/ponyc/src/libponyrt/ds/fun.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/ds/hash.c             -o /tmp/ponyc/src/libponyrt/ds/hash.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/ds/list.c             -o /tmp/ponyc/src/libponyrt/ds/list.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/ds/stack.c            -o /tmp/ponyc/src/libponyrt/ds/stack.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/gc/actormap.c         -o /tmp/ponyc/src/libponyrt/gc/actormap.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/gc/cycle.c            -o /tmp/ponyc/src/libponyrt/gc/cycle.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/gc/delta.c            -o /tmp/ponyc/src/libponyrt/gc/delta.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/gc/gc.c               -o /tmp/ponyc/src/libponyrt/gc/gc.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/gc/objectmap.c        -o /tmp/ponyc/src/libponyrt/gc/objectmap.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/gc/serialise.c        -o /tmp/ponyc/src/libponyrt/gc/serialise.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/gc/trace.c            -o /tmp/ponyc/src/libponyrt/gc/trace.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/directory.c      -o /tmp/ponyc/src/libponyrt/lang/directory.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/errno.c          -o /tmp/ponyc/src/libponyrt/lang/errno.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/io.c             -o /tmp/ponyc/src/libponyrt/lang/io.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/lsda.c           -o /tmp/ponyc/src/libponyrt/lang/lsda.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/paths.c          -o /tmp/ponyc/src/libponyrt/lang/paths.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/posix_except.c   -o /tmp/ponyc/src/libponyrt/lang/posix_except.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/process.c        -o /tmp/ponyc/src/libponyrt/lang/process.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/socket.c         -o /tmp/ponyc/src/libponyrt/lang/socket.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/ssl.c            -o /tmp/ponyc/src/libponyrt/lang/ssl.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/stat.c           -o /tmp/ponyc/src/libponyrt/lang/stat.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/stdfd.c          -o /tmp/ponyc/src/libponyrt/lang/stdfd.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/time.c           -o /tmp/ponyc/src/libponyrt/lang/time.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/lang/win_except.c     -o /tmp/ponyc/src/libponyrt/lang/win_except.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/mem/alloc.c           -o /tmp/ponyc/src/libponyrt/mem/alloc.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/mem/heap.c            -o /tmp/ponyc/src/libponyrt/mem/heap.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/mem/pagemap.c         -o /tmp/ponyc/src/libponyrt/mem/pagemap.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/mem/pool.c            -o /tmp/ponyc/src/libponyrt/mem/pool.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/options/options.c     -o /tmp/ponyc/src/libponyrt/options/options.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/platform/ponyassert.c -o /tmp/ponyc/src/libponyrt/platform/ponyassert.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/platform/threads.c    -o /tmp/ponyc/src/libponyrt/platform/threads.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/sched/cpu.c           -o /tmp/ponyc/src/libponyrt/sched/cpu.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/sched/mpmcq.c         -o /tmp/ponyc/src/libponyrt/sched/mpmcq.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/sched/mutemap.c       -o /tmp/ponyc/src/libponyrt/sched/mutemap.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/sched/scheduler.c     -o /tmp/ponyc/src/libponyrt/sched/scheduler.bc
+          clang++ -w -S -emit-llvm -DPONY_BUILD_CONFIG='"release"' -DPONY_VERSION_STR='"Savi"' -I/tmp/ponyc/src/libponyrt -I/tmp/ponyc/src/common /tmp/ponyc/src/libponyrt/sched/start.c         -o /tmp/ponyc/src/libponyrt/sched/start.bc
+
+          llvm-link \
+            src/libponyrt/actor/actor.bc \
+            src/libponyrt/actor/messageq.bc \
+            src/libponyrt/asio/asio.bc \
+            src/libponyrt/asio/epoll.bc \
+            src/libponyrt/asio/event.bc \
+            src/libponyrt/asio/iocp.bc \
+            src/libponyrt/asio/kqueue.bc \
+            src/libponyrt/ds/fun.bc \
+            src/libponyrt/ds/hash.bc \
+            src/libponyrt/ds/list.bc \
+            src/libponyrt/ds/stack.bc \
+            src/libponyrt/gc/actormap.bc \
+            src/libponyrt/gc/cycle.bc \
+            src/libponyrt/gc/delta.bc \
+            src/libponyrt/gc/gc.bc \
+            src/libponyrt/gc/objectmap.bc \
+            src/libponyrt/gc/serialise.bc \
+            src/libponyrt/gc/trace.bc \
+            src/libponyrt/lang/directory.bc \
+            src/libponyrt/lang/errno.bc \
+            src/libponyrt/lang/io.bc \
+            src/libponyrt/lang/lsda.bc \
+            src/libponyrt/lang/paths.bc \
+            src/libponyrt/lang/posix_except.bc \
+            src/libponyrt/lang/process.bc \
+            src/libponyrt/lang/socket.bc \
+            src/libponyrt/lang/ssl.bc \
+            src/libponyrt/lang/stat.bc \
+            src/libponyrt/lang/stdfd.bc \
+            src/libponyrt/lang/time.bc \
+            src/libponyrt/lang/win_except.bc \
+            src/libponyrt/mem/alloc.bc \
+            src/libponyrt/mem/heap.bc \
+            src/libponyrt/mem/pagemap.bc \
+            src/libponyrt/mem/pool.bc \
+            src/libponyrt/options/options.bc \
+            src/libponyrt/platform/ponyassert.bc \
+            src/libponyrt/platform/threads.bc \
+            src/libponyrt/sched/cpu.bc \
+            src/libponyrt/sched/mpmcq.bc \
+            src/libponyrt/sched/mutemap.bc \
+            src/libponyrt/sched/scheduler.bc \
+            src/libponyrt/sched/start.bc \
+            > runtime.bc
+
+        # cmake --version
+        # ls "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools"
+        # ls "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm"
+        # ls "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm/x64"
+        # ls "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm/x64/bin"
+        # ls "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm/x64/bin/clang-cl.exe"
+        # clang --version
+        # mkdir /tmp/ponyc/src/libponyrt/build
+        # cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -T ClangCL -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        # cmake --build /tmp/ponyc/src/libponyrt/build --target libponyrt_bc
+
+        # cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -G Ninja -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm/x64/bin/clang-cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/Llvm/x64/bin/clang-cl.exe" -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        # cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -G Ninja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        # cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang -DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU -DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        # cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang.exe" -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        # cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON

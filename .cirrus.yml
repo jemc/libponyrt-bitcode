@@ -2,9 +2,13 @@ build_task:
   environment: &environment
     GITHUB_API_TOKEN: ENCRYPTED[636741c0f231293de78980eb83f86c5b8cd5dad07a79351e239c097e42ee4cc0f28113a26f6ad579437e40fcb227066c]
     PONYC_GIT_URL: https://github.com/ponylang/ponyc
-    PONYC_VERSION: main # TODO: use "0.47.1" when it is released
+    PONYC_VERSION: main # TODO: use "0.50.1" when it is released
+    XWIN_RELEASE_URL: https://github.com/Jake-Shadle/xwin/releases/download/0.2.1/xwin-0.2.1-x86_64-unknown-linux-musl.tar.gz
+    XWIN_CACHE_COMMAND: mkdir /tmp/xwin; echo "xwin is not needed on this platform" > /tmp/xwin/noop.txt
     CC: clang
     CXX: clang++
+    DEBUGINFO_CFLAGS: -O0 -g -fdebug-prefix-map=/tmp/ponyc/src/libponyrt=libsavi_runtime
+    CFLAGS: ${DEBUGINFO_CFLAGS}
 
   matrix:
     # (when adding new matrix tasks, also add them as deps to the bundle_task)
@@ -80,12 +84,38 @@ build_task:
       brew_usr_local_cache:
         folder: "/usr/local/Homebrew"
 
+    - name: x86_64-unknown-windows-msvc
+      container:
+        image: ubuntu:22.04
+      environment:
+        TRIPLE: x86_64-unknown-windows-msvc
+        DEPS_INSTALL_PRE: apt-get update && apt-get install -y --no-install-recommends apt-transport-https ca-certificates clang cmake curl git llvm make
+        DEPS_INSTALL: curl -L --fail ${XWIN_RELEASE_URL} | tar --strip-components=1 --wildcards -xvzf - '*/xwin'
+        # Without this next environment var, apt-get will try to ask us
+        # interactive questions, to which we will be unable to respond...
+        DEBIAN_FRONTEND: noninteractive
+        # Without this next environment var, `xwin` won't download windows SDKs.
+        XWIN_ACCEPT_LICENSE: '1'
+        # This cache command will download SDKs and then the extract them
+        # to the correct output directory (unless they are already cached).
+        XWIN_CACHE_COMMAND: ./xwin splat --output /tmp/xwin && find /tmp/xwin # ./xwin download
+        # Here are the compilation settings we'll use to enable cross-compiling.
+        CC: clang++ # we pretend that clang++ is a C compiler (and not just C++)
+        CFLAGS: ${DEBUGINFO_CFLAGS} -fms-extensions -fms-compatibility -Wno-microsoft-cast -Wno-deprecated -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-pragma-pack -Wno-unknown-pragmas -Wno-ignored-attributes -Wno-unused-local-typedef -Wno-missing-field-initializers -Wno-missing-braces -Wno-implicit-int-conversion -Wno-int-in-bool-context -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -mcx16 -D_CRT_USE_BUILTIN_OFFSETOF -I/tmp/xwin/sdk/include/ucrt -I/tmp/xwin/crt/include -I/tmp/xwin/sdk/include/um -I/tmp/xwin/sdk/include/shared -I/tmp/xwin/sdk/include/shared
+        EXTRA_CMAKE_FLAGS: -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-windows-msvc -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_PROCESSOR=x86_64 -DCMAKE_C_COMPILER_WORKS=true -DCMAKE_CXX_COMPILER_WORKS=true
+
   deps_script:
-    - sh -c "${DEPS_INSTALL_PRE:-echo}" && sh -c "${DEPS_INSTALL:-echo}"
+    - sh -xc "${DEPS_INSTALL_PRE:-echo}" && sh -xc "${DEPS_INSTALL:-echo}"
+
+  xwin_cache:
+    folder: /tmp/xwin
+    fingerprint_script: echo "${TRIPLE} 20220504.1"
+    populate_script: sh -xc "${XWIN_CACHE_COMMAND}"
+  upload_caches: [xwin]
 
   ponyc_clone_script: &ponyc_clone_script
     - git clone -b ${PONYC_VERSION} --depth 1 ${PONYC_GIT_URL} /tmp/ponyc
-    - sh -c "${PATCH_1:-echo}" && sh -c "${PATCH_2:-echo}"
+    - sh -xc "${PATCH_1:-echo}" && sh -xc "${PATCH_2:-echo}"
     - cd /tmp/ponyc && git diff
     - cd /tmp/ponyc && git apply ${CIRRUS_WORKING_DIR}/patches/*
 
@@ -118,6 +148,7 @@ bundle_task:
     - x86_64-unknown-freebsd
     - x86_64-apple-macosx
     - arm64-apple-macosx
+    - x86_64-unknown-windows-msvc
   environment: *environment
   container:
     image: alpine:3.15

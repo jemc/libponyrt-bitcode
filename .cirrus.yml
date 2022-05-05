@@ -89,7 +89,7 @@ build_task:
         image: ubuntu:22.04
       environment:
         TRIPLE: x86_64-unknown-windows-msvc
-        DEPS_INSTALL_PRE: apt-get update && apt-get install -y --no-install-recommends apt-transport-https ca-certificates clang cmake curl git llvm make
+        DEPS_INSTALL_PRE: apt-get update && apt-get install -y --no-install-recommends apt-transport-https ca-certificates clang-12 cmake curl git llvm-12 make && ln -s /usr/bin/clang-12 /usr/bin/clang && ln -s /usr/bin/clang++-12 /usr/bin/clang++ && ln -s /usr/bin/llvm-link-12 /usr/bin/llvm-link
         DEPS_INSTALL: curl -L --fail ${XWIN_RELEASE_URL} | tar --strip-components=1 --wildcards -xvzf - '*/xwin'
         # Without this next environment var, apt-get will try to ask us
         # interactive questions, to which we will be unable to respond...
@@ -106,6 +106,9 @@ build_task:
 
   deps_script:
     - sh -xc "${DEPS_INSTALL_PRE:-echo}" && sh -xc "${DEPS_INSTALL:-echo}"
+    - clang --version
+    - clang++ --version
+    - llvm-link --version
 
   xwin_cache:
     folder: /tmp/xwin

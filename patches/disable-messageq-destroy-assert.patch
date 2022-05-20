@@ -1,0 +1,15 @@
+diff --git a/src/libponyrt/actor/messageq.c b/src/libponyrt/actor/messageq.c
+index 972bebc8..02f5d5b7 100644
+--- a/src/libponyrt/actor/messageq.c
++++ b/src/libponyrt/actor/messageq.c
+@@ -96,8 +96,8 @@ void ponyint_messageq_init(messageq_t* q)
+ void ponyint_messageq_destroy(messageq_t* q)
+ {
+   pony_msg_t* tail = q->tail;
+-  pony_assert((((uintptr_t)atomic_load_explicit(&q->head, memory_order_acquire) &
+-    ~(uintptr_t)1)) == (uintptr_t)tail);
++  // pony_assert((((uintptr_t)atomic_load_explicit(&q->head, memory_order_acquire) &
++  //   ~(uintptr_t)1)) == (uintptr_t)tail);
+ #ifdef USE_VALGRIND
+   ANNOTATE_HAPPENS_BEFORE_FORGET_ALL(tail);
+ #endif

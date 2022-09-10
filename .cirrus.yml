@@ -2,7 +2,7 @@ build_task:
   environment: &environment
     GITHUB_API_TOKEN: ENCRYPTED[636741c0f231293de78980eb83f86c5b8cd5dad07a79351e239c097e42ee4cc0f28113a26f6ad579437e40fcb227066c]
     PONYC_GIT_URL: https://github.com/ponylang/ponyc
-    PONYC_VERSION: main # TODO: use "0.50.1" when it is released
+    PONYC_VERSION: 0.51.2
     XWIN_RELEASE_URL: https://github.com/Jake-Shadle/xwin/releases/download/0.2.1/xwin-0.2.1-x86_64-unknown-linux-musl.tar.gz
     XWIN_CACHE_COMMAND: mkdir /tmp/xwin; echo "xwin is not needed on this platform" > /tmp/xwin/noop.txt
     CC: clang
@@ -120,7 +120,9 @@ build_task:
     - git clone -b ${PONYC_VERSION} --depth 1 ${PONYC_GIT_URL} /tmp/ponyc
     - sh -xc "${PATCH_1:-echo}" && sh -xc "${PATCH_2:-echo}"
     - cd /tmp/ponyc && git diff
-    - cd /tmp/ponyc && git apply ${CIRRUS_WORKING_DIR}/patches/*
+
+    # If we need to apply any patches in the future, we can bring this back:
+    # - cd /tmp/ponyc && git apply ${CIRRUS_WORKING_DIR}/patches
 
   build_script:
     - mkdir /tmp/ponyc/src/libponyrt/build

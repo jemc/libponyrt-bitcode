@@ -48,7 +48,7 @@ build_task:
         DEPS_INSTALL_PRE: pkg update
         DEPS_INSTALL: pkg install -y cmake gmake libunwind git llvm
       freebsd_instance:
-        image: freebsd-13-0-release-amd64
+        image: freebsd-13-1-release-amd64
 
     - name: x86_64-apple-macosx
       environment:

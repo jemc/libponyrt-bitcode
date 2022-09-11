@@ -1,0 +1,13 @@
+diff --git a/src/libponyrt/CMakeLists.txt b/src/libponyrt/CMakeLists.txt
+index 06ef5919..7ca37f50 100644
+--- a/src/libponyrt/CMakeLists.txt
++++ b/src/libponyrt/CMakeLists.txt
+@@ -151,7 +151,7 @@ if(PONY_RUNTIME_BITCODE)
+     list(APPEND _ll_bc_all ${_ll_except_src})
+ 
+     add_custom_target(libponyrt_bc ALL
+-        ${libponyrt_SOURCE_DIR}/../../build/libs/bin/llvm-link -o "${libponyrt_BINARY_DIR}/libponyrt.bc" ${_ll_bc_all}
++        llvm-link -o "${libponyrt_BINARY_DIR}/libponyrt.bc" ${_ll_bc_all}
+         DEPENDS ${_ll_bc_all}
+     )
+ 

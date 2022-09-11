@@ -120,7 +120,7 @@ build_task:
     - git clone -b ${PONYC_VERSION} --depth 1 ${PONYC_GIT_URL} /tmp/ponyc
     - sh -xc "${PATCH_1:-echo}" && sh -xc "${PATCH_2:-echo}"
     - cd /tmp/ponyc && git diff
-    - cd /tmp/ponyc && git apply ${CIRRUS_WORKING_DIR}/patches
+    - cd /tmp/ponyc && git apply ${CIRRUS_WORKING_DIR}/patches/*
 
   build_script:
     - mkdir /tmp/ponyc/src/libponyrt/build

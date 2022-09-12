@@ -8,7 +8,7 @@ build_task:
     CC: clang
     CXX: clang++
     DEBUGINFO_CFLAGS: -O0 -g -fdebug-prefix-map=/tmp/ponyc/src/libponyrt=libsavi_runtime
-    CFLAGS: ${DEBUGINFO_CFLAGS}
+    CFLAGS: ${DEBUGINFO_CFLAGS} -march=native -mtune=generic
 
   matrix:
     # (when adding new matrix tasks, also add them as deps to the bundle_task)
@@ -30,6 +30,9 @@ build_task:
         DEPS_INSTALL: apk add --no-cache --update alpine-sdk coreutils linux-headers clang-dev cmake llvm12-dev
         PATCH_1: sed -i s/SO_RCVTIMEO/SO_RCVTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
         PATCH_2: sed -i s/SO_SNDTIMEO/SO_SNDTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
+        # We skip the `-march` and `-mtune` CFLAGS on arm64.
+        # For some (unknown) reason, they aren't supported by current clang.
+        CFLAGS: ${DEBUGINFO_CFLAGS}
       container:
         image: alpine:3.15
 
@@ -39,6 +42,9 @@ build_task:
         DEPS_INSTALL: apk add --no-cache --update alpine-sdk coreutils linux-headers clang-dev cmake llvm12-dev
         PATCH_1: sed -i s/SO_RCVTIMEO/SO_RCVTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
         PATCH_2: sed -i s/SO_SNDTIMEO/SO_SNDTIMEO_OLD/g /tmp/ponyc/src/libponyrt/lang/socket.c
+        # We skip the `-march` and `-mtune` CFLAGS on arm64 platforms.
+        # For some (unknown) reason, they aren't supported by current clang.
+        CFLAGS: ${DEBUGINFO_CFLAGS}
       arm_container:
         image: alpine:3.15
 
@@ -76,6 +82,9 @@ build_task:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1" # optimizes brew install
         # We're compiling on an x86_64 host, but want to cross-compile to arm64.
         EXTRA_CMAKE_FLAGS: "-DCMAKE_C_COMPILER_TARGET=arm64-apple-macosx -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=arm64"
+        # We skip the `-march` and `-mtune` CFLAGS on arm64 platforms.
+        # For some (unknown) reason, they aren't supported by current clang.
+        CFLAGS: ${DEBUGINFO_CFLAGS}
       macos_instance:
         image: big-sur-xcode-12.5
       # Caching some homebrew directories helps save some of the otherwise huge

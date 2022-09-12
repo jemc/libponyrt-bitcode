@@ -64,6 +64,9 @@ build_task:
         DEPS_INSTALL: ln -s $(brew --prefix llvm@12)/bin/llvm-link /usr/local/bin/llvm-link
         SDKROOT: /Applications/Xcode-12.5.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1" # optimizes brew install
+        # We skip the `-march` and `-mtune` CFLAGS on MacOS.
+        # Not sure why, but it causes "illegal instruction" errors in Savi.
+        CFLAGS: ${DEBUGINFO_CFLAGS}
       macos_instance:
         image: big-sur-xcode-12.5
       # Caching some homebrew directories helps save some of the otherwise huge

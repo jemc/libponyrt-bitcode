@@ -57,6 +57,33 @@ build_task:
       freebsd_instance:
         image: freebsd-13-1-release-amd64
 
+    - name: x86_64-unknown-dragonfly
+      environment:
+        TRIPLE: x86_64-unknown-dragonfly
+        DEPS_INSTALL_PRE: "pkg update \
+          && pkg install -y cmake gmake libunwind git llvm14 \
+          && ln -s /usr/local/bin/llvm-link14 /usr/local/bin/llvm-link"
+        DEPS_INSTALL: " \
+          curl -L --fail http://www.ravenports.com/repository/dragonfly:6.2:x86:64/All/ravensys-root-single-dragonfly-3.2_6.tzst \
+            | tar --strip-components=5 -xvzf - \
+          && sh -c 'cd DragonFly/usr/lib/gcc80 && ln -s libgcc_pic.a libgcc.a' \
+          && mkdir -p DragonFly/usr/include \
+          && curl -L --fail https://raw.githubusercontent.com/DragonFlyBSD/DragonFlyBSD/DragonFly_RELEASE_6_2/lib/libexecinfo/execinfo.h \
+            > DragonFly/usr/include/execinfo.h \
+          && patch /usr/include/sys/stdatomic.h \
+            platform-patches/dragonfly-stdatomic.patch \
+            -o DragonFly/usr/include/stdatomic.h \
+          "
+        CFLAGS: ${DEBUGINFO_CFLAGS} -IDragonFly/usr/include
+        EXTRA_CMAKE_FLAGS: >
+          -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-dragonfly
+          -DCMAKE_SYSTEM_NAME=DragonFly
+          -DCMAKE_SYSTEM_PROCESSOR=x86_64
+          -DCMAKE_C_COMPILER_WORKS=true
+          -DCMAKE_CXX_COMPILER_WORKS=true
+      freebsd_instance:
+        image: freebsd-13-1-release-amd64
+
     - name: x86_64-apple-macosx
       environment:
         TRIPLE: x86_64-apple-macosx
@@ -162,6 +189,7 @@ bundle_task:
     - x86_64-unknown-linux-musl
     - arm64-unknown-linux-musl
     - x86_64-unknown-freebsd
+    - x86_64-unknown-dragonfly
     - x86_64-apple-macosx
     - arm64-apple-macosx
     - x86_64-unknown-windows-msvc

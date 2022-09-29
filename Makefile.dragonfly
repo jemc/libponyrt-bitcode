@@ -1,0 +1,53 @@
+BUILDDIR=/tmp/libsavi_runtime
+EXTRA_CMAKE_FLAGS=
+PONYC_VERSION=main
+PONYC_GIT_URL=https://github.com/ponylang/ponyc
+PATCH_DIR=$(.CURDIR)/patches
+RAVENPORTS=http://www.ravenports.com/repository/dragonfly:6.2:x86:64/All
+SYSROOT=${BUILDDIR}/dfly/raven/share/raven/sysroot/DragonFly
+
+build: ${BUILDDIR}/ponyc ${BUILDDIR}/dfly
+	mkdir -p ${BUILDDIR}/ponyc/src/libponyrt/build
+	env CC=clang14 CXX=clang++14 \
+		CFLAGS="--sysroot=${SYSROOT} -I${BUILDDIR}/dfly/raven/include" \
+		LDFLAGS="-L${SYSROOT}/usr/lib -L${SYSROOT}/usr/lib/gcc80"  \
+	cmake \
+		-S ${BUILDDIR}/ponyc/src/libponyrt \
+		-B ${BUILDDIR}/ponyc/src/libponyrt/build \
+		-DPONY_RUNTIME_BITCODE=true \
+		-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+		-DLLVM_LINK=llvm-link14 \
+		-DCMAKE_C_COMPILER_TARGET=x86_64-unknown-dragonfly \
+		-DPONY_CROSS_LIBPONYRT=true \
+		${EXTRA_CMAKE_FLAGS}
+
+	cmake --build ${BUILDDIR}/ponyc/src/libponyrt/build --target libponyrt_bc
+
+# Checkout ponyc sources
+${BUILDDIR}/ponyc:
+	git clone -b ${PONYC_VERSION} --depth 1 ${PONYC_GIT_URL} ${BUILDDIR}/ponyc
+	cd ${BUILDDIR}/ponyc && git diff
+	cd ${BUILDDIR}/ponyc && git apply $(PATCH_DIR)/*
+
+# Download DragonFly sysroot using Ravenports + manual patches
+# DragonFly uses a different libexecinfo library that Ravenports under DragonFly,
+# so we need to use the one from DragonFly.
+${BUILDDIR}/dfly: ${BUILDDIR}/ravensys-root-single-dragonfly-3.2_6.tzst
+	rm -rf ${BUILDDIR}/_dfly
+	mkdir -p ${BUILDDIR}/_dfly
+	cd ${BUILDDIR}/_dfly && tar xvzf ${BUILDDIR}/ravensys-root-single-dragonfly-3.2_6.tzst
+	cd ${BUILDDIR}/_dfly/raven/share/raven/sysroot/DragonFly/usr/lib/gcc80 && ln -s libgcc_pic.a libgcc.a
+	mkdir -p ${BUILDDIR}/_dfly/raven/include
+	cp files/dfly/stdatomic.h files/dfly/execinfo.h ${BUILDDIR}/_dfly/raven/include
+	mv ${BUILDDIR}/_dfly ${BUILDDIR}/dfly 
+
+# Download the sysroot for DragonFly used by Ravenports
+${BUILDDIR}/ravensys-root-single-dragonfly-3.2_6.tzst:
+	wget -O ${BUILDDIR}/ravensys-root-single-dragonfly-3.2_6.tzst ${RAVENPORTS}/ravensys-root-single-dragonfly-3.2_6.tzst
+
+
+
+clean:
+	rm -rf ${BUILDDIR}
+
+

@@ -137,8 +137,17 @@ build_task:
 
   build_script:
     - mkdir /tmp/ponyc/src/libponyrt/build
-    - cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -DPONY_RUNTIME_BITCODE=true -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${EXTRA_CMAKE_FLAGS}
+    - cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -DPONY_RUNTIME_BITCODE:BOOL=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ${EXTRA_CMAKE_FLAGS}
     - cmake --build /tmp/ponyc/src/libponyrt/build --target libponyrt_bc
+    - cp /tmp/ponyc/src/libponyrt/build/libponyrt.bc /tmp/libsavi_runtime-${TRIPLE}.bc
+    - rm -rf /tmp/ponyc/src/libponyrt/build
+
+  build_with_runtime_stats_script:
+    - mkdir /tmp/ponyc/src/libponyrt/build
+    - cmake -S /tmp/ponyc/src/libponyrt -B /tmp/ponyc/src/libponyrt/build -DPONY_RUNTIME_BITCODE:BOOL=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DPONY_USE_RUNTIMESTATS:BOOL=ON ${EXTRA_CMAKE_FLAGS}
+    - cmake --build /tmp/ponyc/src/libponyrt/build --target libponyrt_bc
+    - cp /tmp/ponyc/src/libponyrt/build/libponyrt.bc /tmp/libsavi_runtime-${TRIPLE}-with-runtime-stats.bc
+    - rm -rf /tmp/ponyc/src/libponyrt/build
 
   publish_if_release_script:
     - echo CIRRUS_RELEASE "${CIRRUS_RELEASE:-NO}"
@@ -149,8 +158,18 @@ build_task:
             -H "Authorization: token ${GITHUB_API_TOKEN}" \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @/tmp/ponyc/src/libponyrt/build/libponyrt.bc \
+            --data-binary @/tmp/libsavi_runtime-${TRIPLE}.bc \
             "https://uploads.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE/assets?name=libsavi_runtime-${TRIPLE}.bc" \
+      '
+    - >-
+      sh -c '
+        test -z "${CIRRUS_RELEASE}" || \
+          curl -v --fail -X POST \
+            -H "Authorization: token ${GITHUB_API_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @/tmp/libsavi_runtime-${TRIPLE}-with-runtime-stats.bc \
+            "https://uploads.github.com/repos/$CIRRUS_REPO_FULL_NAME/releases/$CIRRUS_RELEASE/assets?name=libsavi_runtime-${TRIPLE}-with-runtime-stats.bc" \
       '
 
 # After each bitcode is published, publish a bundle containing them all.

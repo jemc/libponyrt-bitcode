@@ -1,0 +1,25 @@
+--- stdatomic.h	2022-09-29 20:56:00.477454696 -0700
++++ stdatomic.h	2022-09-29 15:57:30.770539373 -0700
+@@ -33,7 +33,11 @@
+ #define	_STDATOMIC_H_
+
+ #include <sys/cdefs.h>
++#if defined(__FreeBSD__)
+ #include <sys/_types.h>
++#elif defined(__DragonFly__)
++#include <sys/types.h>
++#endif
+
+ #if __has_extension(c_atomic) || __has_extension(cxx_atomic)
+ #define	__CLANG_ATOMICS
+@@ -195,8 +199,10 @@
+ typedef _Atomic(unsigned long)		atomic_ulong;
+ typedef _Atomic(long long)		atomic_llong;
+ typedef _Atomic(unsigned long long)	atomic_ullong;
++#if !defined(__DragonFly__)
+ typedef _Atomic(__char16_t)		atomic_char16_t;
+ typedef _Atomic(__char32_t)		atomic_char32_t;
++#endif
+ typedef _Atomic(___wchar_t)		atomic_wchar_t;
+ typedef _Atomic(__int_least8_t)		atomic_int_least8_t;
+ typedef _Atomic(__uint_least8_t)	atomic_uint_least8_t;
